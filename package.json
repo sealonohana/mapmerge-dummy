@@ -1,0 +1,12 @@
+{
+  "name": "mapmerge-dummy",
+  "version": "0.0.1",
+  "description": "Merges between maps",
+  "license": "MIT",
+  "author": "Seal Security",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test"
+  }
+}
