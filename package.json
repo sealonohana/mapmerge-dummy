@@ -2,10 +2,38 @@
   "name": "mapmerge-dummy",
   "version": "0.0.1",
   "description": "Merges between maps",
+  "keywords": [
+    "merge",
+    "deepmerge",
+    "deep-merge",
+    "object",
+    "map",
+    "recursive",
+    "utility"
+  ],
+  "homepage": "https://github.com/sealonohana/mapmerge-dummy#readme",
+  "bugs": {
+    "url": "https://github.com/sealonohana/mapmerge-dummy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sealonohana/mapmerge-dummy.git"
+  },
   "license": "MIT",
   "author": "Seal Security",
   "type": "commonjs",
   "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "test": "node --test"
   }
