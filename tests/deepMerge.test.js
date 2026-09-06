@@ -1,6 +1,6 @@
 'use strict';
 
-const { describe, it } = require('node:test');
+const { describe, it, afterEach } = require('node:test');
 const assert = require('node:assert/strict');
 const { deepMerge } = require('..');
 
@@ -129,5 +129,45 @@ describe('edge cases', () => {
 
   it('throws when the target is not an object', () => {
     assert.throws(() => deepMerge(null, { a: 1 }));
+  });
+});
+
+describe('prototype pollution protection (CWE-1321)', () => {
+  // Defensively strip anything a regression might have leaked onto the
+  // prototype, so a failure here can't cascade into other tests.
+  afterEach(() => {
+    for (const key of ['polluted', 'isAdmin']) delete Object.prototype[key];
+  });
+
+  it('a JSON __proto__ payload does not pollute Object.prototype', () => {
+    const result = deepMerge({}, JSON.parse('{"__proto__":{"polluted":"yes"}}'));
+    assert.equal({}.polluted, undefined);
+    assert.equal(Object.prototype.polluted, undefined);
+    assert.deepEqual(result, {}); // the forbidden key is dropped entirely
+  });
+
+  it('a computed ["__proto__"] payload does not pollute Object.prototype', () => {
+    const payload = { ['__proto__']: { polluted: 'yes' } };
+    deepMerge({}, payload);
+    assert.equal({}.polluted, undefined);
+    assert.equal(Object.prototype.polluted, undefined);
+  });
+
+  it('a constructor.prototype gadget does not pollute Object.prototype', () => {
+    deepMerge({}, JSON.parse('{"constructor":{"prototype":{"isAdmin":true}}}'));
+    assert.equal({}.isAdmin, undefined);
+    assert.equal(Object.prototype.isAdmin, undefined);
+  });
+
+  it('cannot override Object.prototype.toString via __proto__', () => {
+    const payload = { ['__proto__']: { toString: () => 'pwned' } };
+    deepMerge({}, payload);
+    assert.equal(({}).toString(), '[object Object]');
+  });
+
+  it('a benign key literally named "__proto__" is skipped, not merged as data', () => {
+    const result = deepMerge({ a: 1 }, JSON.parse('{"__proto__":{"x":1},"b":2}'));
+    assert.deepEqual(result, { a: 1, b: 2 }); // b merges, __proto__ dropped
+    assert.equal(Object.getPrototypeOf(result), Object.prototype); // prototype intact
   });
 });
