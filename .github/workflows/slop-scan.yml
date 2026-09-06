@@ -1,0 +1,22 @@
+name: slop-scan
+
+on:
+  workflow_dispatch:        # run it manually from the Actions tab
+  push:
+    branches: [main]
+  # schedule:               # optional: weekly sweep
+  #   - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - id: scan
+        uses: sealonohana/slop-detector@main    # or pin the SHA: @69f150b
+        with:
+          llm-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # fail-on: fabricated    # uncomment to fail the job on high-confidence slop
+
